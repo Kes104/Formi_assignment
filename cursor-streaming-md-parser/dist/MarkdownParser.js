@@ -1,3 +1,4 @@
+"use strict";
 const blogpostMarkdown = `# control
 
 *humans should focus on bigger problems*
@@ -50,19 +51,16 @@ git push origin build-todesktop
 - Wait for 14 minutes for gulp and ~30 minutes for todesktop
 - Go to todesktop.com, test the build locally and hit release
 `;
-
 let inInlineCode = false;
 let inBlockCode = false;
 let backtickBuffer = "";
-
-let currentContainer: HTMLElement | null = null; 
+let currentContainer = null;
 // Do not edit this method
 function runStream() {
-    currentContainer = document.getElementById('markdownContainer')!;
-
+    currentContainer = document.getElementById('markdownContainer');
     // this randomly split the markdown into tokens between 2 and 20 characters long
     // simulates the behavior of an ml model thats giving you weirdly chunked tokens
-    const tokens: string[] = [];
+    const tokens = [];
     let remainingMarkdown = blogpostMarkdown;
     while (remainingMarkdown.length > 0) {
         const tokenLength = Math.floor(Math.random() * 18) + 2;
@@ -70,62 +68,57 @@ function runStream() {
         tokens.push(token);
         remainingMarkdown = remainingMarkdown.slice(tokenLength);
     }
-
     const toCancel = setInterval(() => {
         const token = tokens.shift();
         if (token) {
             addToken(token);
-        } else {
+        }
+        else {
             clearInterval(toCancel);
         }
     }, 20);
 }
-
-
-/* 
+/*
 Please edit the addToken method to support at least inline codeblocks and codeblocks. Feel free to add any other methods you need.
 This starter code does token streaming with no styling right now. Your job is to write the parsing logic to make the styling work.
 
 Note: don't be afraid of using globals for state. For this challenge, speed is preferred over cleanliness.
  */
-function addToken(token: string) {
-   if (!currentContainer) return;
-
+function addToken(token) {
+    if (!currentContainer)
+        return;
     for (const char of token) {
-
         // Track backticks across chunk boundaries
         if (char === "`") {
             backtickBuffer += "`";
-        } else {
+        }
+        else {
             backtickBuffer = "";
         }
-
         // Triple backtick → toggle block code
         if (backtickBuffer === "```") {
             inBlockCode = !inBlockCode;
             backtickBuffer = "";
             continue; // do not render backticks
         }
-
         // Single backtick → toggle inline code (only if not in block)
         if (char === "`" && !inBlockCode) {
             inInlineCode = !inInlineCode;
             continue; // do not render backtick
         }
-
         const span = document.createElement("span");
         span.innerText = char;
-
         if (inBlockCode) {
             span.style.background = "#000";
             span.style.color = "#fff";
             span.style.fontFamily = "monospace";
-        } else if (inInlineCode) {
+        }
+        else if (inInlineCode) {
             span.style.background = "#222";
             span.style.color = "#0f0";
             span.style.fontFamily = "monospace";
         }
-
         currentContainer.appendChild(span);
     }
 }
+//# sourceMappingURL=MarkdownParser.js.map
